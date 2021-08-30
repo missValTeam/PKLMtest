@@ -1,16 +1,15 @@
 Package: PKLMtest
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Type: Package
+Title: Classification based MCAR test
+Version: 1.0.0
+Author: Loris Michel, Meta-Lina Spohn, Jeffrey Naef
+Maintainer: Jeff Naef <naef@stat.math.ethz.ch>
+Description: Implementation of a KL-based scoring rule to assess the quality of different missing value imputations in the broad sense as introduced in Michel et al. (2021)  <arXiv:???????>. !!!!!
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Depends:
+  parallel,
+  stats,
+  ranger
