@@ -18,7 +18,7 @@ devtools::install_github("missValTeam/PKLMtest")
 ## Examples: 
 
 ```r
- n <- 500 
+n <- 500 
 X <- cbind(rnorm(n),rnorm(n))
 X.NA <- X
 X.NA[,1] <- ifelse(stats::runif(n)<=0.2, NA, X[,1])
