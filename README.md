@@ -3,7 +3,7 @@
 
 ## Overview
 
-PKLMtest is a package intended to provide a framework for testing MCAR with classification. It implements the test  described in [Michel, Naef, Spohn and Meinshausen. 2021](https://arxiv.org/abs/2106.03742) . Examples of use of the library are shown below.
+PKLMtest is a package intended to provide a framework for testing MCAR with classification. It implements the test  described in [Michel, Naef, Spohn and Meinshausen. 2021](https://arxiv.org/abs/2109.10150) . Examples of use of the library are shown below.
 
 
 ## Installation
