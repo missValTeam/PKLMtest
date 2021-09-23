@@ -1,5 +1,6 @@
 #' Truncation of probability
 #' @param p a numeric value between 0 and 1 to be truncated
+#' @return a numeric value with truncated probabilities
 truncProb <- function(p) {
   return(pmin(pmax(p, 10^{-9}), 1-10^{-9}))
 }
@@ -7,6 +8,7 @@ truncProb <- function(p) {
 #' Generate the test statistic
 #' @param st a ranger forest object.
 #' @param lab an integer value containing the class labels
+#' @return the likelihood-based test statistic
 genU <- function(st, lab) {
 
   # OOB preds

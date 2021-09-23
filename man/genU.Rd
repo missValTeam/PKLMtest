@@ -11,6 +11,9 @@ genU(st, lab)
 
 \item{lab}{an integer value containing the class labels}
 }
+\value{
+the likelihood-based test statistic
+}
 \description{
 Generate the test statistic
 }

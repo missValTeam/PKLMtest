@@ -12,12 +12,12 @@
 #' @import parallel
 #'
 #' @examples
-#' n <- 500
+#' n <- 100
 #' X <- cbind(rnorm(n),rnorm(n))
 #' X.NA <- X
 #' X.NA[,1] <- ifelse(stats::runif(n)<=0.2, NA, X[,1])
 #'
-#' pval <- PKLMtest(X)
+#' pval <- PKLMtest(X.NA, num.proj = 5)
 #'
 #' @return a numeric value, the p-value(s) for the MCAR test, the first value is always the global p-value and if compute.partial.pvals is set to TRUE, the next values are the partial p-values for the relative importance of each variable.
 #'
@@ -30,6 +30,11 @@ PKLMtest <- function(X,
                     size.resp.set = 2,
                     compute.partial.pvals = FALSE,
                     ...) {
+
+  # checks
+  if (num.proj < 2) {
+    stop("num-proj should be at least 2.")
+  }
 
   # simplification
   size.resp.set <- size.resp.set - 1
@@ -160,43 +165,42 @@ PKLMtest <- function(X,
     }
 
   }
-  print(paste0("number of NAs in given projection/permutation: ", mean(is.na(unlist(list.null)))))
 
   stat.perm.raw <- Reduce(list.null,f = rbind)
 
-  ##### partial p-values #########
 
-  isIn <- sapply(1:ncol(X), function(i) sapply(list.var.resp, function(l) !(i %in% l))) # list.var.resp
-  isIn <- cbind(rep(TRUE, num.proj ), isIn)
-  if (!compute.partial.pvals) {
-    isIn <- isIn[,1,drop=FALSE]
-  }
 
-  partial.perm <- apply(isIn ,2, function(x) {
-    ids <- which(x)
 
-    colMeans(stat.perm.raw[ids,,drop=FALSE], na.rm=T)
-
-  })
-  if (ncol(isIn)==1) {
-    partial.perm <- matrix(partial.perm, nrow=1)
-  }
-
-  partial.obs <- apply(isIn ,2, function(x) {
-    ids <- which(x)
-
-    if (kind=="mean"){
-      ## mean
-      mean(unlist(list.obs[ids]),
-           na.rm=T)
-    } else if (kind=="sup"){
-      ## max
-      max(unlist(list.obs[ids])[is.finite(unlist(list.obs[ids]))],
-          na.rm=T)
+    isIn <- sapply(1:ncol(X), function(i) sapply(list.var.resp, function(l) !(i %in% l))) # list.var.resp
+    isIn <- cbind(rep(TRUE, num.proj ), isIn)
+    if (!compute.partial.pvals) {
+      isIn <- isIn[,1,drop=FALSE]
     }
 
+    partial.perm <- apply(isIn ,2, function(x) {
+      ids <- which(x)
 
-  })
+      colMeans(stat.perm.raw[ids,,drop=FALSE], na.rm=T)
+
+    })
+    if (ncol(isIn)==1) {
+      partial.perm <- matrix(partial.perm, nrow=1)
+    }
+
+    partial.obs <- apply(isIn ,2, function(x) {
+
+      if (sum(x)==0) {
+        return(NA)
+      } else {
+        ids <- which(x)
+        return(mean(unlist(list.obs[ids]),
+             na.rm=T))
+      }
+
+
+    })
+
+    ##### partial p-values #########
 
   if (compute.partial.pvals){
     pvals <- sapply(1:(ncol(X)+1), function(i) (sum(partial.perm[,i] >= partial.obs[i])+1)/(length(partial.perm[,i])+1))

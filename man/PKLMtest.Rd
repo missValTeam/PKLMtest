@@ -39,11 +39,11 @@ a numeric value, the p-value(s) for the MCAR test, the first value is always the
 PKLMtest: compute a p-value for testing MCAR
 }
 \examples{
-n <- 500
+n <- 100
 X <- cbind(rnorm(n),rnorm(n))
 X.NA <- X
 X.NA[,1] <- ifelse(stats::runif(n)<=0.2, NA, X[,1])
 
-pval <- PKLMtest(X)
+pval <- PKLMtest(X.NA, num.proj = 5)
 
 }

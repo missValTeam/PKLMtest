@@ -9,6 +9,9 @@ truncProb(p)
 \arguments{
 \item{p}{a numeric value between 0 and 1 to be truncated}
 }
+\value{
+a numeric value with truncated probabilities
+}
 \description{
 Truncation of probability
 }
