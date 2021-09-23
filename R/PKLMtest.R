@@ -1,12 +1,12 @@
 #' PKLMtest: compute a p-value for testing MCAR
 #'
-#' @param X a matrix containing missing values, the data.
-#' @param num.proj an integer specifying the number of projections to consider for the score.
-#' @param num.trees.per.proj an integer, the number of trees per projection.
-#' @param nrep an integer, the number of permutations.
-#' @param min.node.size the minimum number of nodes in a tree.
+#' @param X a numeric matrix containing missing values encoded as NA, the data.
+#' @param num.proj a positive integer specifying the number of projections to consider for the score.
+#' @param num.trees.per.proj a positive integer, the number of trees per projection.
+#' @param nrep a positive integer, the number of permutations.
+#' @param min.node.size  a positive number, the minimum number of nodes in a tree.
 #' @param size.resp.set an integer (>= 2), maximum number of classes allowed to be compared in each projection.
-#' @param compute.partial.pvals boolean, indicate if partial p-values shopuld be computed as well.
+#' @param compute.partial.pvals a boolean, indicate if partial p-values shopuld be computed as well.
 #' @param ... additional parameters.
 #' @import ranger
 #' @import parallel
@@ -19,21 +19,19 @@
 #'
 #' pval <- PKLMtest(X)
 #'
-#' @return a numeric value, the p-value(s) for the MCAR test.
+#' @return a numeric value, the p-value(s) for the MCAR test, the first value is always the global p-value and if compute.partial.pvals is set to TRUE, the next values are the partial p-values for the relative importance of each variable.
 #'
 #' @export
 PKLMtest <- function(X,
                     num.proj = 300,
                     num.trees.per.proj = 10,
                     nrep = 500,
-                    min.node.size=10,
+                    min.node.size = 10,
                     size.resp.set = 2,
                     compute.partial.pvals = FALSE,
                     ...) {
 
-
-  ## Combining p-values in Nicolais way without refitting the forest each time
-
+  # simplification
   size.resp.set <- size.resp.set - 1
 
   # checks
@@ -44,14 +42,8 @@ PKLMtest <- function(X,
   # get the mask for the data provided in X
   M <- is.na(X)
 
-  Mperm<-lapply(1:nrep, function(j) M[sample(nrow(M)),])
-
-  # retrieve the global unique patterns (not really needed)
-  #unique.pat <- unique(M)
-  #ids.patterns <- sapply(1:nrow(unique.pat),
-  #                       function(i) which(apply(M,
-  #                                               1,
-  #                                               function(m) identical(m, unique.pat[i,]))))
+  # copute the permutations of the missing value patterns
+  Mperm <- lapply(1:nrep, function(j) M[sample(nrow(M)),])
 
   # list of results
   list.obs <- list()
@@ -61,9 +53,6 @@ PKLMtest <- function(X,
 
   # main loop
   while (length(list.obs) != num.proj) {
-
-
-    # print(length(list.obs))
 
     # sample a projection for the response
     new.var <- c()
@@ -91,8 +80,6 @@ PKLMtest <- function(X,
         var.resp <- var.cov
       }
 
-
-
       # which one are complete there
       ids.keep <- which(apply(X[,var.cov,drop=FALSE],
                               1, function(x) !any(is.na(x))))
@@ -110,9 +97,9 @@ PKLMtest <- function(X,
 
     ids.patterns.resp <- sapply(1:nrow(unique.pat.resp),
                                 function(i) which(apply(M.resp,
-                                                        1,
-                                                        function(m) identical(m,
-                                                                              unique.pat.resp[i,]))), simplify = F)
+                                            1,
+                                            function(m) identical(m,
+                                            unique.pat.resp[i,]))), simplify = F)
 
     # get the data for the projection
     X.proj <- X[ids.keep,var.cov,drop=F]
@@ -151,12 +138,6 @@ PKLMtest <- function(X,
 
     } )
 
-    # permute under the null
-    #class.resp.perm <- lapply(1:nrep, FUN = function(x) sample(class.resp))
-
-    # if more than one class
-    #if (length(unique(class.resp))!=1) {
-
     d <- data.frame(y = factor(class.resp),
                     X = X.proj)
 
@@ -166,13 +147,6 @@ PKLMtest <- function(X,
                                    min.node.size = min.node.size,
                                    probability = TRUE)
     }, error = function(e) NA)
-
-    # st<-ranger::ranger(y~., data = d,
-    #                num.trees = num.trees.per.proj,
-    #                classification = TRUE,
-    #                min.node.size = min.node.size,
-    #                probability = TRUE)
-
 
     if(!any(is.na(st))) {
 
@@ -188,15 +162,7 @@ PKLMtest <- function(X,
   }
   print(paste0("number of NAs in given projection/permutation: ", mean(is.na(unlist(list.null)))))
 
-
-  #lapply(1:length(list.null), function(i) (sum(list.obs[[i]] > list.null[[i]])+1)/(length(list.null[[i]])+1) )
-
-
-  #print(dim(isIn))
-  #print(dim(isIn))
   stat.perm.raw <- Reduce(list.null,f = rbind)
-
-
 
   ##### partial p-values #########
 
@@ -208,12 +174,8 @@ PKLMtest <- function(X,
 
   partial.perm <- apply(isIn ,2, function(x) {
     ids <- which(x)
-    #apply(stat.perm.raw[ids,,drop=FALSE], 2, function(x) mean(x, na.rm=T ))  # mean(x[is.finite(x)])
-    ##
-
 
     colMeans(stat.perm.raw[ids,,drop=FALSE], na.rm=T)
-
 
   })
   if (ncol(isIn)==1) {
@@ -246,12 +208,6 @@ PKLMtest <- function(X,
 
   ##############################
 
-
-
-  # old
-  ####pval <- (sum(stat.null>obs)+1)/(length(stat.null)+1)
-
   return(pvals)
-  # isIn = isIn))
 
 }

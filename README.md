@@ -8,7 +8,7 @@ PKLMtest is a package intended to provide a framework for testing MCAR with clas
 
 ## Installation
 
-The package should be (soon) available on CRAN, To install the package from github you can run
+To install the package from github you can run
 
 ``` r
 install.packages("devtools")
@@ -22,7 +22,6 @@ n <- 500
 X <- cbind(rnorm(n),rnorm(n))
 X.NA <- X
 X.NA[,1] <- ifelse(stats::runif(n)<=0.2, NA, X[,1])
-
 pval <- PKLMtest(X)
 ```
 

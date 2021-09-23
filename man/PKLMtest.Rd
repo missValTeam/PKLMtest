@@ -16,24 +16,24 @@ PKLMtest(
 )
 }
 \arguments{
-\item{X}{a matrix containing missing values, the data.}
+\item{X}{a numeric matrix containing missing values encoded as NA, the data.}
 
-\item{num.proj}{an integer specifying the number of projections to consider for the score.}
+\item{num.proj}{a positive integer specifying the number of projections to consider for the score.}
 
-\item{num.trees.per.proj}{an integer, the number of trees per projection.}
+\item{num.trees.per.proj}{a positive integer, the number of trees per projection.}
 
-\item{nrep}{an integer, the number of permutations.}
+\item{nrep}{a positive integer, the number of permutations.}
 
-\item{min.node.size}{the minimum number of nodes in a tree.}
+\item{min.node.size}{a positive number, the minimum number of nodes in a tree.}
 
 \item{size.resp.set}{an integer (>= 2), maximum number of classes allowed to be compared in each projection.}
 
-\item{compute.partial.pvals}{boolean, indicate if partial p-values shopuld be computed as well.}
+\item{compute.partial.pvals}{a boolean, indicate if partial p-values shopuld be computed as well.}
 
 \item{...}{additional parameters.}
 }
 \value{
-a numeric value, the p-value(s) for the MCAR test.
+a numeric value, the p-value(s) for the MCAR test, the first value is always the global p-value and if compute.partial.pvals is set to TRUE, the next values are the partial p-values for the relative importance of each variable.
 }
 \description{
 PKLMtest: compute a p-value for testing MCAR
