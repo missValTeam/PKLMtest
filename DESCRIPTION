@@ -1,6 +1,6 @@
 Package: PKLMtest
 Type: Package
-Title: Classification based MCAR test
+Title: Classification Based MCAR Test
 Version: 1.0.0
 Author: Loris Michel, Meta-Lina Spohn, Jeffrey Naef
 Maintainer: Meta-Lina Spohn <metalina.spohn@stat.math.ethz.ch>
