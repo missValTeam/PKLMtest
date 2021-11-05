@@ -23,21 +23,25 @@
 #'
 #' @export
 PKLMtest <- function(X,
-                    num.proj = 300,
-                    num.trees.per.proj = 10,
-                    nrep = 500,
-                    min.node.size = 10,
-                    size.resp.set = 2,
-                    compute.partial.pvals = FALSE,
-                    ...) {
+                     num.proj = 300,
+                     num.trees.per.proj = 10,
+                     nrep = 500,
+                     min.node.size = 10,
+                     size.resp.set = 2,
+                     compute.partial.pvals = FALSE,
+                     ...) {
 
   # checks
   if (num.proj < 2) {
     stop("num-proj should be at least 2.")
   }
 
+  if (size.resp.set < 2) {
+    stop("size.resp.set should be at least 2.")
+  }
+
   # simplification
-  size.resp.set <- size.resp.set - 1
+  #size.resp.set <- size.resp.set - 1
 
   # checks
   if (!is.matrix(X)) {
@@ -102,9 +106,9 @@ PKLMtest <- function(X,
 
     ids.patterns.resp <- sapply(1:nrow(unique.pat.resp),
                                 function(i) which(apply(M.resp,
-                                            1,
-                                            function(m) identical(m,
-                                            unique.pat.resp[i,]))), simplify = F)
+                                                        1,
+                                                        function(m) identical(m,
+                                                                              unique.pat.resp[i,]))), simplify = F)
 
     # get the data for the projection
     X.proj <- X[ids.keep,var.cov,drop=F]
@@ -162,45 +166,54 @@ PKLMtest <- function(X,
       list.obs[[length(list.obs)+1]] <- obs
       list.null[[length(list.null)+1]] <- null
 
+    }else{
+      list.var.cov <- list.var.cov[-length(list.var.cov)]
+      list.var.resp <- list.var.cov[-length(list.var.resp)]
     }
 
+
+
+
+
   }
+  print("while done")
 
   stat.perm.raw <- Reduce(list.null,f = rbind)
 
 
 
 
-    isIn <- sapply(1:ncol(X), function(i) sapply(list.var.resp, function(l) !(i %in% l))) # list.var.resp
-    isIn <- cbind(rep(TRUE, num.proj ), isIn)
-    if (!compute.partial.pvals) {
-      isIn <- isIn[,1,drop=FALSE]
-    }
+  isIn <- sapply(1:ncol(X), function(i) sapply(list.var.resp, function(l) !(i %in% l))) # list.var.resp
+  isIn <- cbind(rep(TRUE, num.proj ), isIn)
+  if (!compute.partial.pvals) {
+    isIn <- isIn[,1,drop=FALSE]
+  }
 
-    partial.perm <- apply(isIn ,2, function(x) {
+  partial.perm <- apply(isIn ,2, function(x) {
+    ids <- which(x)
+
+    colMeans(stat.perm.raw[ids,,drop=FALSE], na.rm=T)
+
+  })
+
+  if (ncol(isIn)==1) {
+    partial.perm <- matrix(partial.perm, nrow=1)
+  }
+
+  partial.obs <- apply(isIn ,2, function(x) {
+
+    if (sum(x)==0) {
+      return(NA)
+    } else {
       ids <- which(x)
-
-      colMeans(stat.perm.raw[ids,,drop=FALSE], na.rm=T)
-
-    })
-    if (ncol(isIn)==1) {
-      partial.perm <- matrix(partial.perm, nrow=1)
+      return(mean(unlist(list.obs[ids]),
+                  na.rm=T))
     }
 
-    partial.obs <- apply(isIn ,2, function(x) {
 
-      if (sum(x)==0) {
-        return(NA)
-      } else {
-        ids <- which(x)
-        return(mean(unlist(list.obs[ids]),
-             na.rm=T))
-      }
+  })
 
-
-    })
-
-    ##### partial p-values #########
+  ##### partial p-values #########
 
   if (compute.partial.pvals){
     pvals <- sapply(1:(ncol(X)+1), function(i) (sum(partial.perm[,i] >= partial.obs[i])+1)/(length(partial.perm[,i])+1))
@@ -215,3 +228,4 @@ PKLMtest <- function(X,
   return(pvals)
 
 }
+
